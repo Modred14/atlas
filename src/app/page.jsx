@@ -1,11 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useJobRadar, JobRadarControls, JobRadarResults } from "./jobRader";
 
 export const owner = {
   firstName: "Favour",
   lastName: "Omirin",
   nickName: "Modred",
+  stack: [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Html",
+    "Css",
+    "Tailwind",
+    "Html5",
+    "PostgreSQL",
+    "MongoDB",
+    "Express",
+    "Python",
+    "Vue.Js",
+  ],
 };
 
 const MOOD = {
@@ -54,6 +71,7 @@ export default function Home() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
   const [liveMessage, setLiveMessage] = useState("");
+  const radar = useJobRadar(owner.stack);
 
   useEffect(() => {
     const storedMessage = localStorage.getItem("adminModredMessage");
@@ -142,7 +160,6 @@ export default function Home() {
 
   return (
     <div className="p-3 flex flex-col gap-3 overflow-x-hidden">
-     
       {/* Hero card — clock, greeting, live status, quick stats */}
       <div
         ref={cardRef}
@@ -327,18 +344,21 @@ export default function Home() {
           delay={240}
         />
       </div>
-       <div>
-        <textarea
-          class="bg-transparent w-full p-3 rounded-2xl placeholder:text-zinc-500 ring focus:outline-none ring-blue-500/10"
-          placeholder={liveMessage || "Type your message here..."}
+      {/* Note to self */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
+        <NoteCard
           value={liveMessage}
-          onChange={(e) => {
-            setLiveMessage(e.target.value);
-            const message = e.target.value;
-            localStorage.setItem("adminModredMessage", message);
+          onChange={(val) => {
+            setLiveMessage(val);
+            localStorage.setItem("adminModredMessage", val);
           }}
+          mounted={mounted}
+          delay={360}
         />
+        <JobRadarControls radar={radar} mounted={mounted} delay={420} />
       </div>
+
+      <JobRadarResults radar={radar} mounted={mounted} delay={480} />
     </div>
   );
 }
@@ -463,7 +483,65 @@ function bucketFor(seconds) {
   }
   return idx;
 }
+function NoteCard({ value, onChange, mounted, delay }) {
+  const [saved, setSaved] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const textareaRef = useRef(null);
+  const saveTimeout = useRef(null);
 
+  function autosize() {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }
+
+  useEffect(() => {
+    autosize();
+  }, [value]);
+
+  function handleChange(e) {
+    onChange(e.target.value);
+    setSaved(false);
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => setSaved(true), 700);
+  }
+
+  return (
+    <CardShell mounted={mounted} delay={delay}>
+      <div className="flex items-baseline justify-between">
+        <h3 className="text-sm text-zinc-400">Note to self</h3>
+        <span
+          className={`text-[11px] font-medium text-emerald-300 transition-opacity duration-500 ${
+            saved && value ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          Saved
+        </span>
+      </div>
+
+      <div
+        className="mt-4 rounded-xl transition-shadow duration-300"
+        style={{
+          border: `1px solid ${focused ? `rgba(${ACCENT},0.5)` : "rgba(255,255,255,0.08)"}`,
+          boxShadow: focused ? `0 0 0 3px rgba(${ACCENT},0.12)` : "none",
+          background: "rgba(255,255,255,0.02)",
+        }}
+      >
+        <textarea
+          ref={textareaRef}
+          rows={2}
+          className="w-full resize-none bg-transparent p-3.5 text-[15px] leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+          placeholder="Anything on your mind…"
+          value={value}
+          onChange={handleChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+      </div>
+    </CardShell>
+  );
+}
 function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
   const days = heatmap || [];
   const weeks = [];
