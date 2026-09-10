@@ -17,7 +17,8 @@ const MOOD = {
 const ACCENT = "77,141,255"; // repo's signature blue (#4d8dff)
 
 const CARD_SURFACE = {
-  background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)), #0b0b0e",
+  background:
+    "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)), #0b0b0e",
   border: "1px solid rgba(255,255,255,0.08)",
   boxShadow: "0 16px 40px -18px rgba(0,0,0,0.55)",
 };
@@ -52,15 +53,26 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
+  const [liveMessage, setLiveMessage] = useState("");
 
+  useEffect(() => {
+    const storedMessage = localStorage.getItem("adminModredMessage");
+    if (storedMessage) {
+      setLiveMessage(storedMessage);
+    }
+  }, []);
   useEffect(() => {
     setMounted(true);
 
     async function updateStats() {
       try {
         const [current, stats] = await Promise.all([
-          fetch("https://track-vs.netlify.app/api/coding/current").then((r) => r.json()),
-          fetch("https://track-vs.netlify.app/api/coding/stats").then((r) => r.json()),
+          fetch("https://track-vs.netlify.app/api/coding/current").then((r) =>
+            r.json(),
+          ),
+          fetch("https://track-vs.netlify.app/api/coding/stats").then((r) =>
+            r.json(),
+          ),
         ]);
 
         setTodayTotal(formatDuration(current.todaySeconds));
@@ -130,6 +142,7 @@ export default function Home() {
 
   return (
     <div className="p-3 flex flex-col gap-3 overflow-x-hidden">
+     
       {/* Hero card — clock, greeting, live status, quick stats */}
       <div
         ref={cardRef}
@@ -147,21 +160,30 @@ export default function Home() {
       >
         <div
           className="glow-blob"
-          style={{ background: `radial-gradient(circle, rgba(${glow},0.35), transparent 70%)` }}
+          style={{
+            background: `radial-gradient(circle, rgba(${glow},0.35), transparent 70%)`,
+          }}
         />
 
         <div className="relative">
           <div className="flex items-center gap-2 text-[15px] text-zinc-300">
             <span>
-              {greeting}, <span className="font-semibold text-white">{owner.nickName}</span>
+              {greeting},{" "}
+              <span className="font-semibold text-white">{owner.nickName}</span>
             </span>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-500 ${
-                isActive ? "bg-emerald-500/10 text-emerald-300" : "bg-white/5 text-zinc-500"
+                isActive
+                  ? "bg-emerald-500/10 text-emerald-300"
+                  : "bg-white/5 text-zinc-500"
               }`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "pulse-dot bg-emerald-400" : "bg-zinc-500"}`} />
-              {isActive ? `Coding${activeLanguage ? ` · ${activeLanguage}` : ""}` : "Idle"}
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${isActive ? "pulse-dot bg-emerald-400" : "bg-zinc-500"}`}
+              />
+              {isActive
+                ? `Coding${activeLanguage ? ` · ${activeLanguage}` : ""}`
+                : "Idle"}
             </span>
           </div>
 
@@ -172,8 +194,15 @@ export default function Home() {
               {mins}
             </div>
             <div className="grid pt-3 font-semibold">
-              <span className="text-[11px] sm:text-[13px] tracking-tight text-zinc-500">{timeOfDay}</span>
-              <span key={secs} className="tick text-base sm:text-xl text-zinc-300">{secs}</span>
+              <span className="text-[11px] sm:text-[13px] tracking-tight text-zinc-500">
+                {timeOfDay}
+              </span>
+              <span
+                key={secs}
+                className="tick text-base sm:text-xl text-zinc-300"
+              >
+                {secs}
+              </span>
             </div>
           </div>
 
@@ -203,26 +232,112 @@ export default function Home() {
         </div>
 
         <style jsx>{`
-          .glow-blob { position: absolute; top: -120px; right: -80px; width: 320px; height: 320px; border-radius: 9999px; filter: blur(50px); animation: drift 22s ease-in-out infinite; pointer-events: none; }
-          @keyframes drift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-24px, 18px) scale(1.08); } }
-          .colon-blink { animation: blink 2s steps(1) infinite; }
-          @keyframes blink { 50% { opacity: 0.25; } }
-          .tick { display: inline-block; animation: tick 300ms ease-out; }
-          @keyframes tick { 0% { opacity: 0.4; transform: translateY(2px) scale(0.94); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-          .flame { display: inline-block; animation: flicker 2.4s ease-in-out infinite; }
-          @keyframes flicker { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.12) rotate(-4deg); } }
-          .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
-          @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); } 50% { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0); } }
+          .glow-blob {
+            position: absolute;
+            top: -120px;
+            right: -80px;
+            width: 320px;
+            height: 320px;
+            border-radius: 9999px;
+            filter: blur(50px);
+            animation: drift 22s ease-in-out infinite;
+            pointer-events: none;
+          }
+          @keyframes drift {
+            0%,
+            100% {
+              transform: translate(0, 0) scale(1);
+            }
+            50% {
+              transform: translate(-24px, 18px) scale(1.08);
+            }
+          }
+          .colon-blink {
+            animation: blink 2s steps(1) infinite;
+          }
+          @keyframes blink {
+            50% {
+              opacity: 0.25;
+            }
+          }
+          .tick {
+            display: inline-block;
+            animation: tick 300ms ease-out;
+          }
+          @keyframes tick {
+            0% {
+              opacity: 0.4;
+              transform: translateY(2px) scale(0.94);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          .flame {
+            display: inline-block;
+            animation: flicker 2.4s ease-in-out infinite;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              transform: scale(1) rotate(0deg);
+            }
+            50% {
+              transform: scale(1.12) rotate(-4deg);
+            }
+          }
+          .pulse-dot {
+            animation: pulse 1.6s ease-in-out infinite;
+          }
+          @keyframes pulse {
+            0%,
+            100% {
+              box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
+            }
+            50% {
+              box-shadow: 0 0 0 4px rgba(52, 211, 153, 0);
+            }
+          }
           @media (prefers-reduced-motion: reduce) {
-            .glow-blob, .colon-blink, .tick, .flame, .pulse-dot { animation: none !important; }
+            .glow-blob,
+            .colon-blink,
+            .tick,
+            .flame,
+            .pulse-dot {
+              animation: none !important;
+            }
           }
         `}</style>
       </div>
 
       {/* History — chart + heatmap, side by side on desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-        <WeekChart weekly={weekly} todayKey={todayKey} loaded={statsLoaded} mounted={mounted} delay={120} />
-        <ActivityHeatmap heatmap={heatmap} loaded={statsLoaded} mounted={mounted} delay={240} />
+        <WeekChart
+          weekly={weekly}
+          todayKey={todayKey}
+          loaded={statsLoaded}
+          mounted={mounted}
+          delay={120}
+        />
+        <ActivityHeatmap
+          heatmap={heatmap}
+          loaded={statsLoaded}
+          mounted={mounted}
+          delay={240}
+        />
+      </div>
+       <div>
+        <textarea
+          class="bg-transparent w-full p-3 rounded-2xl placeholder:text-zinc-500 ring focus:outline-none ring-blue-500/10"
+          placeholder={liveMessage || "Type your message here..."}
+          value={liveMessage}
+          onChange={(e) => {
+            setLiveMessage(e.target.value);
+            const message = e.target.value;
+            localStorage.setItem("adminModredMessage", message);
+          }}
+        />
       </div>
     </div>
   );
@@ -232,7 +347,9 @@ function StatChip({ label, value, warm = false }) {
   return (
     <div
       className={`rounded-xl px-3 py-2.5 transition-colors duration-300 ${
-        warm ? "bg-orange-500/[0.06] border border-orange-400/20" : "bg-white/[0.03] border border-white/10"
+        warm
+          ? "bg-orange-500/[0.06] border border-orange-400/20"
+          : "bg-white/[0.03] border border-white/10"
       }`}
     >
       <div className="text-xs font-medium text-zinc-500">{label}</div>
@@ -247,11 +364,16 @@ function CardShell({ children, mounted, delay = 0 }) {
       className={`relative overflow-hidden rounded-2xl p-6 transition-[opacity,transform] duration-700 ease-out ${
         mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
       }`}
-      style={{ ...CARD_SURFACE, transitionDelay: mounted ? `${delay}ms` : "0ms" }}
+      style={{
+        ...CARD_SURFACE,
+        transitionDelay: mounted ? `${delay}ms` : "0ms",
+      }}
     >
       <div
         className="absolute inset-x-6 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.55), transparent)` }}
+        style={{
+          background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.55), transparent)`,
+        }}
       />
       {children}
     </div>
@@ -279,7 +401,10 @@ function WeekChart({ weekly, todayKey, loaded, mounted, delay }) {
             const heightPct = Math.max(3, (d.seconds / max) * 100);
             const isToday = d.date === todayKey;
             return (
-              <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
+              <div
+                key={d.date}
+                className="flex flex-1 flex-col items-center gap-2"
+              >
                 <div className="group relative flex h-24 w-full items-end">
                   <div
                     className="pointer-events-none absolute -top-9 left-1/2 z-10 -translate-x-1/2 scale-95 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-all duration-150 group-hover:scale-100 group-hover:opacity-100"
@@ -298,14 +423,18 @@ function WeekChart({ weekly, todayKey, loaded, mounted, delay }) {
                       background: isToday
                         ? `linear-gradient(180deg, rgba(170,200,255,1), rgb(${ACCENT}))`
                         : "rgba(255,255,255,0.12)",
-                      boxShadow: isToday ? `0 0 16px -4px rgba(${ACCENT},0.6)` : "none",
+                      boxShadow: isToday
+                        ? `0 0 16px -4px rgba(${ACCENT},0.6)`
+                        : "none",
                       transitionDelay: `${i * 40}ms`,
                     }}
                   />
                 </div>
                 <span
                   className="text-xs font-medium"
-                  style={{ color: isToday ? `rgb(${ACCENT})` : "rgb(113,113,122)" }}
+                  style={{
+                    color: isToday ? `rgb(${ACCENT})` : "rgb(113,113,122)",
+                  }}
                 >
                   {d.day}
                 </span>
@@ -350,14 +479,17 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
       <div className="flex items-baseline justify-between ">
         <div>
           <h3 className="text-sm text-zinc-400">Activity</h3>
-          <p className="mt-0.5 text-xs text-zinc-600">Last {days.length || 182} days</p>
+          <p className="mt-0.5 text-xs text-zinc-600">
+            Last {days.length || 182} days
+          </p>
         </div>
         <div className="text-right">
-          <div className="font-mono text-2xl font-bold text-white tabular-nums">{activeDays}</div>
+          <div className="font-mono text-2xl font-bold text-white tabular-nums">
+            {activeDays}
+          </div>
           <div className="text-[11px] text-zinc-600">active days</div>
         </div>
       </div>
-
       <div className="mt-6 overflow-x-auto overflow-y-hidden">
         <div className="flex gap-[3px]">
           {weeks.map((week, wi) => (
@@ -372,7 +504,9 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
                     className="cell-reveal h-[9px] w-[9px] rounded-[2px] transition-transform duration-150 hover:scale-125 hover:z-10"
                     style={{
                       background: `rgba(${ACCENT},${opacity})`,
-                      animationDelay: loaded ? `${Math.min(idx * 1.2, 500)}ms` : "0ms",
+                      animationDelay: loaded
+                        ? `${Math.min(idx * 1.2, 500)}ms`
+                        : "0ms",
                       opacity: loaded ? undefined : 0,
                     }}
                   />
@@ -386,7 +520,11 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
       <div className="mt-4 flex items-center gap-1.5 text-xs text-zinc-600">
         <span>Less</span>
         {BUCKET_OPACITY.map((o, i) => (
-          <span key={i} className="h-[9px] w-[9px] rounded-[2px]" style={{ background: `rgba(${ACCENT},${o})` }} />
+          <span
+            key={i}
+            className="h-[9px] w-[9px] rounded-[2px]"
+            style={{ background: `rgba(${ACCENT},${o})` }}
+          />
         ))}
         <span>More</span>
       </div>
@@ -396,11 +534,20 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
           animation: cellFade 260ms ease-out both;
         }
         @keyframes cellFade {
-          from { opacity: 0; transform: scale(0.6); }
-          to { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.6);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
         @media (prefers-reduced-motion: reduce) {
-          .cell-reveal { animation: none !important; opacity: 1 !important; }
+          .cell-reveal {
+            animation: none !important;
+            opacity: 1 !important;
+          }
         }
       `}</style>
     </CardShell>
