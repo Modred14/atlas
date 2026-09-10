@@ -35,7 +35,12 @@ export default function Home() {
   setInterval(updateStats, 60000); // refresh every minute
 
   setInterval(() => {
-    const clockTime = new Date().toLocaleTimeString();
+    const clockTime = new Date().toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
     if (clockTime < "12:00:00") {
       setGreeting("Good Morning");
       setTimeOfDay("AM");
