@@ -207,10 +207,12 @@ export default function Home() {
                 value={
                   <span className="inline-flex flex-wrap items-baseline gap-1">
                     <AnimatedNumber value={streakDays} className="tabular-nums" />
-                    <span>{streakDays === 1 ? "day" : "days"}</span>
-                    {/* <span className="flame" aria-hidden="true">
+                    <span className="hidden sm:block">
+                      {streakDays === 1 ? "day" : "days"}
+                    </span>
+                    <span className="flame text-sm sm:text-base" aria-hidden="true">
                       🔥
-                    </span> */}
+                    </span>
                   </span>
                 }
                 warm
