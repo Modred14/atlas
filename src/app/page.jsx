@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Flame } from "lucide-react";
 import { useJobRadar, JobRadarControls, JobRadarResults } from "./jobRader";
 import GlassPanel from "./components/GlassPanel";
 import SectionHeader from "./components/SectionHeader";
 import AnimatedNumber from "./components/AnimatedNumber";
 import { owner, ACCENT, MOOD, moodForClock } from "./lib/owner";
+
 
 function formatDuration(totalSeconds = 0) {
   const seconds = Math.max(0, Math.floor(totalSeconds || 0));
@@ -204,23 +206,19 @@ export default function Home() {
 
             <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
               <StatChip label="Today" value={todayTotal} />
-              <StatChip
+                           <StatChip
                 label="Current Streak"
                 value={
                   <span className="inline-flex flex-wrap items-baseline gap-1">
-                    <AnimatedNumber
-                      value={streakDays}
-                      className="tabular-nums"
-                    />
+                    <AnimatedNumber value={streakDays} className="tabular-nums" />
                     <span className="hidden sm:inline">
                       {streakDays === 1 ? "day" : "days"}
                     </span>
-                    <span
-                      className="flame text-xs sm:text-base"
+                    <Flame
+                      className="flame h-3.5 w-3.5 shrink-0 text-orange-400 sm:h-4 sm:w-4"
+                      strokeWidth={2.4}
                       aria-hidden="true"
-                    >
-                      🔥
-                    </span>
+                    />
                   </span>
                 }
                 warm
