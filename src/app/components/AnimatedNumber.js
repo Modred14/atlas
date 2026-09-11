@@ -1,21 +1,59 @@
-export default function SectionHeader({ eyebrow, title, description, icon: Icon, action }) {
-  return (
-    <div className="mb-4 flex items-end justify-between gap-4 px-1">
-      <div className="min-w-0">
-        {eyebrow && (
-          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-500">
-            {Icon && <Icon size={12} strokeWidth={2.4} />}
-            {eyebrow}
-          </div>
-        )}
-        <h2 className="mt-1 text-lg font-semibold tracking-tight text-white sm:text-xl">
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-0.5 text-sm text-zinc-500">{description}</p>
-        )}
-      </div>
-      {action && <div className="shrink-0">{action}</div>}
-    </div>
-  );
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+/**
+ * Animates numeric text from its previous value to a new one whenever
+ * `value` changes. Falls back to an instant snap if the user prefers
+ * reduced motion.
+ */
+function toFinite(n) {
+  return Number.isFinite(n) ? n : 0;
+}
+
+export default function AnimatedNumber({
+  value = 0,
+  duration = 600,
+  format = (n) => Math.round(toFinite(n)).toLocaleString(),
+  className = "",
+}) {
+  const safeValue = toFinite(value);
+  const [display, setDisplay] = useState(safeValue);
+  const fromRef = useRef(safeValue);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced) {
+      setDisplay(safeValue);
+      fromRef.current = safeValue;
+      return;
+    }
+
+    const from = fromRef.current;
+    const to = safeValue;
+    if (from === to) return;
+
+    const start = performance.now();
+    cancelAnimationFrame(rafRef.current);
+
+    function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setDisplay(from + (to - from) * eased);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = to;
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [safeValue, duration]);
+
+  return <span className={className}>{format(display)}</span>;
 }

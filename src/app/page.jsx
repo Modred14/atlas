@@ -202,13 +202,15 @@ export default function Home() {
 
             <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
               <StatChip label="Today" value={todayTotal} />
-              <StatChip
+                           <StatChip
                 label="Current Streak"
                 value={
-                  <span className="inline-flex items-center gap-1">
-                    <AnimatedNumber value={streakDays} />{" "}
-                    {streakDays === 1 ? "day" : "days"}
-                    <span className="flame">🔥</span>
+                  <span className="inline-flex flex-wrap items-baseline gap-1">
+                    <AnimatedNumber value={streakDays} className="tabular-nums" />
+                    <span>{streakDays === 1 ? "day" : "days"}</span>
+                    <span className="flame" aria-hidden="true">
+                      🔥
+                    </span>
                   </span>
                 }
                 warm
