@@ -307,22 +307,11 @@ export default function Home() {
           `}</style>
         </div>
 
-        {/* Note to self lives here — a quick, always-on "today" tool */}
-        <div className="mt-3">
-          <NoteCard
-            value={liveMessage}
-            onChange={(val) => {
-              setLiveMessage(val);
-              localStorage.setItem("adminModredMessage", val);
-            }}
-            mounted={mounted}
-            delay={120}
-          />
-        </div>
+        {/* Note to self lives here — a quick, always-on "today" tool */}  
       </section>
 
       {/* ===== INSIGHTS ===== */}
-      <section id="insights" className="scroll-mt-6">
+     <section id="insights" className="scroll-mt-6">
         <SectionHeader
           eyebrow="Activity"
           title="Insights"
@@ -343,7 +332,21 @@ export default function Home() {
             delay={240}
           />
         </div>
+
+        {/* Quick note — sits below the activity charts */}
+        <div className="mt-3">
+          <NoteCard
+            value={liveMessage}
+            onChange={(val) => {
+              setLiveMessage(val);
+              localStorage.setItem("adminModredMessage", val);
+            }}
+            mounted={mounted}
+            delay={320}
+          />
+        </div>
       </section>
+
 
       {/* ===== JOB RADAR ===== */}
       <section id="radar" className="scroll-mt-6 pb-6">
