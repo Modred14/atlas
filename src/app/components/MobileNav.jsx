@@ -6,14 +6,10 @@ import { useActiveSection } from "../hooks/useActiveSection";
 const SECTION_IDS = NAV_ITEMS.map((item) => item.id);
 
 export default function MobileNav() {
-  const activeId = useActiveSection(SECTION_IDS, {
-    rootMargin: "-10% 0px -70% 0px",
-  });
+  const activeId = useActiveSection(SECTION_IDS, { rootMargin: "-10% 0px -70% 0px" });
 
   function goTo(id) {
-    document
-      .getElementById(id)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (

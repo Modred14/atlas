@@ -1,7 +1,7 @@
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
-import AmbientBackground from "@/components/AmbientBackground";
-import AppShell from "@/components/AppShell";
+import AmbientBackground from "./components/AmbientBackground";
+import AppShell from "./components/AppShell";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],

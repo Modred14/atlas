@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useJobRadar, JobRadarControls, JobRadarResults } from "./jobRader";
-import GlassPanel from "@/components/GlassPanel";
-import SectionHeader from "@/components/SectionHeader";
-import AnimatedNumber from "@/components/AnimatedNumber";
-import { owner, ACCENT, MOOD, moodForClock } from "@/lib/owner";
+import GlassPanel from "./components/GlassPanel";
+import SectionHeader from "./components/SectionHeader";
+import AnimatedNumber from "./components/AnimatedNumber";
+import { owner, ACCENT, MOOD, moodForClock } from "./lib/owner";
 
 function formatDuration(totalSeconds = 0) {
   const seconds = Math.max(0, Math.floor(totalSeconds || 0));

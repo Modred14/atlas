@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Search, Plus, X, ExternalLink, Clock3, Sparkles } from "lucide-react";
-import GlassPanel from "@/components/GlassPanel";
-import AnimatedNumber from "@/components/AnimatedNumber";
+import GlassPanel from "./components/GlassPanel";
+import AnimatedNumber from "./components/AnimatedNumber";
 
 const ACCENT = "77,141,255";
 
@@ -32,13 +32,22 @@ function locationTags(locationStr = "") {
   const s = locationStr.toLowerCase();
   const tags = [];
   const worldwide = /worldwide|anywhere|global/.test(s);
-  if (worldwide || s.includes("nigeria") || s.includes("africa")) tags.push("Nigeria");
-  if (worldwide || s.includes("usa") || s.includes("united states") || /\bus\b/.test(s)) tags.push("USA");
+  if (worldwide || s.includes("nigeria") || s.includes("africa"))
+    tags.push("Nigeria");
+  if (
+    worldwide ||
+    s.includes("usa") ||
+    s.includes("united states") ||
+    /\bus\b/.test(s)
+  )
+    tags.push("USA");
   return tags;
 }
 
 async function fetchRemotive(query) {
-  const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}`);
+  const res = await fetch(
+    `https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}`,
+  );
   if (!res.ok) throw new Error("Remotive request failed");
   const data = await res.json();
   return (data.jobs || []).map((j) => ({
@@ -133,7 +142,9 @@ export function useJobRadar(initialSkills = DEFAULT_SKILLS) {
       if (r.status === "fulfilled") {
         all = all.concat(r.value);
       } else {
-        failed.push(["Remotive (full stack)", "Remotive (frontend)", "Arbeitnow"][i]);
+        failed.push(
+          ["Remotive (full stack)", "Remotive (frontend)", "Arbeitnow"][i],
+        );
       }
     });
 
@@ -158,7 +169,10 @@ export function useJobRadar(initialSkills = DEFAULT_SKILLS) {
     }
 
     finalJobs.forEach((j) => seenIds.add(j.id));
-    localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seenIds).slice(-500)));
+    localStorage.setItem(
+      SEEN_KEY,
+      JSON.stringify(Array.from(seenIds).slice(-500)),
+    );
 
     setJobs(finalJobs);
     setLastRun(new Date());
@@ -181,14 +195,24 @@ export function useJobRadar(initialSkills = DEFAULT_SKILLS) {
 
 /** Left/right card: title, status pill, search button, skill chips. */
 export function JobRadarControls({ radar, mounted, delay = 0 }) {
-  const { skills, skillInput, setSkillInput, addSkill, removeSkill, status, runSearch } = radar;
+  const {
+    skills,
+    skillInput,
+    setSkillInput,
+    addSkill,
+    removeSkill,
+    status,
+    runSearch,
+  } = radar;
   const isLoading = status === "loading";
 
   return (
     <GlassPanel mounted={mounted} delay={delay}>
       <div
         className="glow-blob"
-        style={{ background: `radial-gradient(circle, rgba(${ACCENT},0.22), transparent 70%)` }}
+        style={{
+          background: `radial-gradient(circle, rgba(${ACCENT},0.22), transparent 70%)`,
+        }}
       />
 
       <div className="relative">
@@ -197,18 +221,24 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
             style={{
-              background: isLoading ? `rgba(${ACCENT},0.12)` : "rgba(255,255,255,0.05)",
+              background: isLoading
+                ? `rgba(${ACCENT},0.12)`
+                : "rgba(255,255,255,0.05)",
               color: isLoading ? `rgb(${ACCENT})` : "rgb(113,113,122)",
             }}
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${isLoading ? "pulse-dot" : ""}`}
-              style={{ background: isLoading ? `rgb(${ACCENT})` : "rgb(113,113,122)" }}
+              style={{
+                background: isLoading ? `rgb(${ACCENT})` : "rgb(113,113,122)",
+              }}
             />
             {isLoading ? "Scanning" : "Standby"}
           </span>
         </div>
-        <p className="mt-0.5 text-xs text-zinc-600">Full Stack &amp; Frontend · Remote (Nigeria / USA)</p>
+        <p className="mt-0.5 text-xs text-zinc-600">
+          Full Stack &amp; Frontend · Remote (Nigeria / USA)
+        </p>
 
         <button
           onClick={runSearch}
@@ -218,7 +248,9 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
             background: isLoading
               ? "rgba(255,255,255,0.06)"
               : `linear-gradient(135deg, rgb(${ACCENT}), rgba(140,120,255,1))`,
-            boxShadow: isLoading ? "none" : `0 10px 24px -8px rgba(${ACCENT},0.45)`,
+            boxShadow: isLoading
+              ? "none"
+              : `0 10px 24px -8px rgba(${ACCENT},0.45)`,
           }}
         >
           {isLoading ? (
@@ -239,7 +271,10 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
             <span
               key={s}
               className="inline-flex items-center gap-1 rounded-full py-1 pl-2.5 pr-1.5 text-xs font-medium text-zinc-300"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
             >
               {s}
               <button
@@ -252,7 +287,10 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
           ))}
           <div
             className="flex items-center gap-1 rounded-full py-1 pl-2 pr-2.5 text-xs"
-            style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.14)" }}
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px dashed rgba(255,255,255,0.14)",
+            }}
           >
             <Plus size={11} className="text-zinc-600" />
             <input
@@ -286,8 +324,13 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
           animation: pulse 1.4s ease-in-out infinite;
         }
         @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(${ACCENT}, 0.5); }
-          50% { box-shadow: 0 0 0 4px rgba(${ACCENT}, 0); }
+          0%,
+          100% {
+            box-shadow: 0 0 0 0 rgba(${ACCENT}, 0.5);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(${ACCENT}, 0);
+          }
         }
         .radar-sweep {
           width: 16px;
@@ -298,10 +341,15 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
           animation: spin 0.8s linear infinite;
         }
         @keyframes spin {
-          to { transform: rotate(360deg); }
+          to {
+            transform: rotate(360deg);
+          }
         }
         @media (prefers-reduced-motion: reduce) {
-          .radar-sweep, .pulse-dot { animation: none !important; }
+          .radar-sweep,
+          .pulse-dot {
+            animation: none !important;
+          }
         }
       `}</style>
     </GlassPanel>
@@ -330,14 +378,19 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
 
         {failedSources.length > 0 && (
           <p className="mt-2 text-[11px] text-amber-400/80">
-            Couldn't reach: {failedSources.join(", ")}. Other sources still shown.
+            Couldn't reach: {failedSources.join(", ")}. Other sources still
+            shown.
           </p>
         )}
 
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {isLoading &&
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="shimmer h-[84px] rounded-xl" style={{ animationDelay: `${i * 100}ms` }} />
+              <div
+                key={i}
+                className="shimmer h-[84px] rounded-xl"
+                style={{ animationDelay: `${i * 100}ms` }}
+              />
             ))}
 
           {status === "done" && jobs.length === 0 && (
@@ -348,8 +401,13 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
               >
                 <Sparkles size={16} className="text-zinc-600" />
               </div>
-              <p className="text-sm text-zinc-500">No new matching roles right now.</p>
-              <p className="text-xs text-zinc-700">You've already seen everything currently posted — check back later.</p>
+              <p className="text-sm text-zinc-500">
+                No new matching roles right now.
+              </p>
+              <p className="text-xs text-zinc-700">
+                You've already seen everything currently posted — check back
+                later.
+              </p>
             </div>
           )}
 
@@ -361,7 +419,9 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
               >
                 <Search size={16} className="text-zinc-600" />
               </div>
-              <p className="text-sm text-zinc-500">Hit Search Now to scan the boards.</p>
+              <p className="text-sm text-zinc-500">
+                Hit Search Now to scan the boards.
+              </p>
             </div>
           )}
 
@@ -372,12 +432,17 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
               target="_blank"
               rel="noopener noreferrer"
               className="job-card group relative flex items-start justify-between gap-3 overflow-hidden rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.035]"
-              style={{ border: "1px solid rgba(255,255,255,0.08)", animationDelay: `${i * 70}ms` }}
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                animationDelay: `${i * 70}ms`,
+              }}
             >
               {i === 0 && (
                 <span
                   className="absolute inset-y-0 left-0 w-[3px]"
-                  style={{ background: `linear-gradient(180deg, rgb(${ACCENT}), rgba(140,120,255,1))` }}
+                  style={{
+                    background: `linear-gradient(180deg, rgb(${ACCENT}), rgba(140,120,255,1))`,
+                  }}
                 />
               )}
 
@@ -385,29 +450,45 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
                 {i === 0 && (
                   <span
                     className="mb-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                    style={{ background: `rgba(${ACCENT},0.14)`, color: `rgb(${ACCENT})` }}
+                    style={{
+                      background: `rgba(${ACCENT},0.14)`,
+                      color: `rgb(${ACCENT})`,
+                    }}
                   >
                     <Sparkles size={10} /> Top match
                   </span>
                 )}
-                <div className="truncate font-semibold text-white group-hover:underline">{j.title}</div>
-                <div className="truncate text-sm text-zinc-500">{j.company}</div>
+                <div className="truncate font-semibold text-white group-hover:underline">
+                  {j.title}
+                </div>
+                <div className="truncate text-sm text-zinc-500">
+                  {j.company}
+                </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   {j.tagsLoc.map((t) => (
                     <span
                       key={t}
                       className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                      style={{ background: `rgba(${ACCENT},0.12)`, color: `rgb(${ACCENT})` }}
+                      style={{
+                        background: `rgba(${ACCENT},0.12)`,
+                        color: `rgb(${ACCENT})`,
+                      }}
                     >
                       {t}
                     </span>
                   ))}
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-zinc-500" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-zinc-500"
+                    style={{ background: "rgba(255,255,255,0.05)" }}
+                  >
                     {j.source}
                   </span>
                   {j.matchScore > 0 && (
-                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-emerald-300" style={{ background: "rgba(52,211,153,0.1)" }}>
+                    <span
+                      className="rounded-full px-2 py-0.5 text-[10px] font-medium text-emerald-300"
+                      style={{ background: "rgba(52,211,153,0.1)" }}
+                    >
                       {j.matchScore} skill match{j.matchScore > 1 ? "es" : ""}
                     </span>
                   )}
@@ -415,8 +496,13 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
               </div>
 
               <div className="flex shrink-0 flex-col items-end gap-2">
-                <span className="whitespace-nowrap text-[11px] text-zinc-600">{timeAgo(j.postedAt)}</span>
-                <ExternalLink size={14} className="text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                <span className="whitespace-nowrap text-[11px] text-zinc-600">
+                  {timeAgo(j.postedAt)}
+                </span>
+                <ExternalLink
+                  size={14}
+                  className="text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100"
+                />
               </div>
             </a>
           ))}
@@ -428,7 +514,8 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
           </p>
         )}
         <p className="mt-2 text-[11px] text-zinc-700">
-          No board exposes real applicant counts — freshest postings rank higher as a rough low-competition proxy, not an actual count.
+          No board exposes real applicant counts — freshest postings rank higher
+          as a rough low-competition proxy, not an actual count.
         </p>
       </div>
 
@@ -437,20 +524,38 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
           animation: cardIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         @keyframes cardIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .shimmer {
-          background: linear-gradient(100deg, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 70%);
+          background: linear-gradient(
+            100deg,
+            rgba(255, 255, 255, 0.02) 30%,
+            rgba(255, 255, 255, 0.06) 50%,
+            rgba(255, 255, 255, 0.02) 70%
+          );
           background-size: 200% 100%;
           animation: shimmer 1.4s ease-in-out infinite;
         }
         @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
         }
         @media (prefers-reduced-motion: reduce) {
-          .job-card, .shimmer { animation: none !important; }
+          .job-card,
+          .shimmer {
+            animation: none !important;
+          }
         }
       `}</style>
     </GlassPanel>
