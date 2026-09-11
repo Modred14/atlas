@@ -154,7 +154,9 @@ export default function Home() {
             <div className="flex items-center gap-2 text-[15px] text-zinc-300">
               <span>
                 {greeting},{" "}
-                <span className="font-semibold text-white">{owner.nickName}</span>
+                <span className="font-semibold text-white">
+                  {owner.nickName}
+                </span>
               </span>
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-500 ${
@@ -201,16 +203,21 @@ export default function Home() {
             </div>
 
             <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-              <StatChip label="Today" value={todayTotal} />
-                           <StatChip
+              <StatChip
                 label="Current Streak"
                 value={
                   <span className="inline-flex flex-wrap items-baseline gap-1">
-                    <AnimatedNumber value={streakDays} className="tabular-nums" />
-                    <span className="hidden sm:block">
+                    <AnimatedNumber
+                      value={streakDays}
+                      className="tabular-nums"
+                    />
+                    <span className="hidden sm:inline">
                       {streakDays === 1 ? "day" : "days"}
                     </span>
-                    <span className="flame text-xs sm:text-base" aria-hidden="true">
+                    <span
+                      className="flame text-xs sm:text-base"
+                      aria-hidden="true"
+                    >
                       🔥
                     </span>
                   </span>
@@ -357,8 +364,9 @@ export default function Home() {
           >
             <p className="text-sm leading-relaxed text-zinc-500">
               Job Radar checks Remotive and Arbeitnow for fresh full-stack and
-              frontend roles, scores them against your skill chips, and
-              surfaces only postings open to <span className="text-zinc-300">Nigeria</span> or the{" "}
+              frontend roles, scores them against your skill chips, and surfaces
+              only postings open to{" "}
+              <span className="text-zinc-300">Nigeria</span> or the{" "}
               <span className="text-zinc-300">USA</span>. Already-seen roles
               won&apos;t show up twice.
             </p>
