@@ -210,7 +210,7 @@ export default function Home() {
                     <span className="hidden sm:block">
                       {streakDays === 1 ? "day" : "days"}
                     </span>
-                    <span className="flame text-sm sm:text-base" aria-hidden="true">
+                    <span className="flame text-xs sm:text-base" aria-hidden="true">
                       🔥
                     </span>
                   </span>
