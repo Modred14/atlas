@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Search, Plus, X, ExternalLink, Clock3, Sparkles } from "lucide-react";
+import GlassPanel from "@/components/GlassPanel";
+import AnimatedNumber from "@/components/AnimatedNumber";
 
 const ACCENT = "77,141,255";
-const CARD_SURFACE = {
-  background:
-    "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)), #0b0b0e",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 16px 40px -18px rgba(0,0,0,0.55)",
-};
 
 const DEFAULT_SKILLS = [
   "JavaScript",
@@ -189,19 +185,10 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
   const isLoading = status === "loading";
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl p-6 transition-[opacity,transform] duration-700 ease-out ${
-        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-      }`}
-      style={{ ...CARD_SURFACE, transitionDelay: mounted ? `${delay}ms` : "0ms" }}
-    >
+    <GlassPanel mounted={mounted} delay={delay}>
       <div
         className="glow-blob"
         style={{ background: `radial-gradient(circle, rgba(${ACCENT},0.22), transparent 70%)` }}
-      />
-      <div
-        className="absolute inset-x-6 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.55), transparent)` }}
       />
 
       <div className="relative">
@@ -317,7 +304,7 @@ export function JobRadarControls({ radar, mounted, delay = 0 }) {
           .radar-sweep, .pulse-dot { animation: none !important; }
         }
       `}</style>
-    </div>
+    </GlassPanel>
   );
 }
 
@@ -327,23 +314,15 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
   const isLoading = status === "loading";
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl p-6 transition-[opacity,transform] duration-700 ease-out ${
-        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-      }`}
-      style={{ ...CARD_SURFACE, transitionDelay: mounted ? `${delay}ms` : "0ms" }}
-    >
-      <div
-        className="absolute inset-x-6 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.55), transparent)` }}
-      />
-
+    <GlassPanel mounted={mounted} delay={delay}>
       <div className="relative">
         <div className="flex items-baseline justify-between">
           <h3 className="text-sm text-zinc-400">Matches</h3>
           {status === "done" && (
             <div className="text-right">
-              <span className="font-mono text-2xl font-bold text-white tabular-nums">{jobs.length}</span>
+              <span className="font-mono text-2xl font-bold text-white tabular-nums">
+                <AnimatedNumber value={jobs.length} />
+              </span>
               <span className="ml-1.5 text-[11px] text-zinc-600">new</span>
             </div>
           )}
@@ -474,6 +453,6 @@ export function JobRadarResults({ radar, mounted, delay = 0 }) {
           .job-card, .shimmer { animation: none !important; }
         }
       `}</style>
-    </div>
+    </GlassPanel>
   );
 }

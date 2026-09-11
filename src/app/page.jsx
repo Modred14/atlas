@@ -2,43 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useJobRadar, JobRadarControls, JobRadarResults } from "./jobRader";
-
-export const owner = {
-  firstName: "Favour",
-  lastName: "Omirin",
-  nickName: "Modred",
-  stack: [
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Next.js",
-    "Node.js",
-    "Html",
-    "Css",
-    "Tailwind",
-    "Html5",
-    "PostgreSQL",
-    "MongoDB",
-    "Express",
-    "Python",
-    "Vue.Js",
-  ],
-};
-
-const MOOD = {
-  AM: { glow: "125,178,255" },
-  PM_DAY: { glow: "251,191,36" },
-  PM_NIGHT: { glow: "129,140,248" },
-};
-
-const ACCENT = "77,141,255"; // repo's signature blue (#4d8dff)
-
-const CARD_SURFACE = {
-  background:
-    "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)), #0b0b0e",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 16px 40px -18px rgba(0,0,0,0.55)",
-};
+import GlassPanel from "@/components/GlassPanel";
+import SectionHeader from "@/components/SectionHeader";
+import AnimatedNumber from "@/components/AnimatedNumber";
+import { owner, ACCENT, MOOD, moodForClock } from "@/lib/owner";
 
 function formatDuration(totalSeconds = 0) {
   const seconds = Math.max(0, Math.floor(totalSeconds || 0));
@@ -79,6 +46,7 @@ export default function Home() {
       setLiveMessage(storedMessage);
     }
   }, []);
+
   useEffect(() => {
     setMounted(true);
 
@@ -120,19 +88,16 @@ export default function Home() {
         hour12: false,
       });
 
-      if (clockTime < "12:00:00") {
-        setGreeting("Good Morning");
-        setTimeOfDay("AM");
-        setMood("AM");
-      } else if (clockTime < "18:00:00") {
-        setGreeting("Good Afternoon");
-        setTimeOfDay("PM");
-        setMood("PM_DAY");
-      } else {
-        setGreeting("Good Evening");
-        setTimeOfDay("PM");
-        setMood("PM_NIGHT");
-      }
+      const nextMood = moodForClock(clockTime);
+      setMood(nextMood);
+      setTimeOfDay(nextMood === "AM" ? "AM" : "PM");
+      setGreeting(
+        nextMood === "AM"
+          ? "Good Morning"
+          : nextMood === "PM_DAY"
+            ? "Good Afternoon"
+            : "Good Evening",
+      );
       setClock(clockTime);
     }, 1000);
 
@@ -159,206 +124,246 @@ export default function Home() {
   }
 
   return (
-    <div className="p-3 flex flex-col gap-3 overflow-x-hidden">
-      {/* Hero card — clock, greeting, live status, quick stats */}
-      <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className={`relative overflow-hidden rounded-2xl p-6 transition-[transform,opacity] duration-700 ease-out will-change-transform ${
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-        }`}
-        style={{
-          ...CARD_SURFACE,
-          transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-          transition: "transform 0.2s ease-out, opacity 0.7s ease-out",
-          boxShadow: `0 20px 60px -20px rgba(0,0,0,0.6), 0 0 40px -18px rgba(${glow},0.35)`,
-        }}
-      >
+    <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pt-6 pb-6 sm:px-6 sm:pt-10 lg:px-10">
+      {/* ===== TODAY ===== */}
+      <section id="today" className="scroll-mt-6">
         <div
-          className="glow-blob"
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className={`relative overflow-hidden rounded-3xl p-6 transition-[transform,opacity] duration-700 ease-out will-change-transform sm:p-8 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          }`}
           style={{
-            background: `radial-gradient(circle, rgba(${glow},0.35), transparent 70%)`,
+            background:
+              "linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)), #0b0b0e",
+            border: "1px solid rgba(255,255,255,0.08)",
+            transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+            transition: "transform 0.2s ease-out, opacity 0.7s ease-out",
+            boxShadow: `0 24px 70px -24px rgba(0,0,0,0.6), 0 0 44px -18px rgba(${glow},0.35)`,
           }}
-        />
+        >
+          <div
+            className="glow-blob"
+            style={{
+              background: `radial-gradient(circle, rgba(${glow},0.35), transparent 70%)`,
+            }}
+          />
 
-        <div className="relative">
-          <div className="flex items-center gap-2 text-[15px] text-zinc-300">
-            <span>
-              {greeting},{" "}
-              <span className="font-semibold text-white">{owner.nickName}</span>
-            </span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-500 ${
-                isActive
-                  ? "bg-emerald-500/10 text-emerald-300"
-                  : "bg-white/5 text-zinc-500"
-              }`}
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${isActive ? "pulse-dot bg-emerald-400" : "bg-zinc-500"}`}
-              />
-              {isActive
-                ? `Coding${activeLanguage ? ` · ${activeLanguage}` : ""}`
-                : "Idle"}
-            </span>
-          </div>
-
-          <div className="mt-2 inline-flex items-start gap-2 font-mono tabular-nums">
-            <div className="text-6xl sm:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-300">
-              {hr}
-              <span className="colon-blink">:</span>
-              {mins}
-            </div>
-            <div className="grid pt-3 font-semibold">
-              <span className="text-[11px] sm:text-[13px] tracking-tight text-zinc-500">
-                {timeOfDay}
+          <div className="relative">
+            <div className="flex items-center gap-2 text-[15px] text-zinc-300">
+              <span>
+                {greeting},{" "}
+                <span className="font-semibold text-white">{owner.nickName}</span>
               </span>
               <span
-                key={secs}
-                className="tick text-base sm:text-xl text-zinc-300"
+                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-500 ${
+                  isActive
+                    ? "bg-emerald-500/10 text-emerald-300"
+                    : "bg-white/5 text-zinc-500"
+                }`}
               >
-                {secs}
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${isActive ? "pulse-dot bg-emerald-400" : "bg-zinc-500"}`}
+                />
+                {isActive
+                  ? `Coding${activeLanguage ? ` · ${activeLanguage}` : ""}`
+                  : "Idle"}
               </span>
+            </div>
+
+            <div className="mt-3 inline-flex items-start gap-2 font-mono tabular-nums">
+              <div className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-300 sm:text-7xl lg:text-8xl">
+                {hr}
+                <span className="colon-blink">:</span>
+                {mins}
+              </div>
+              <div className="grid pt-3 font-semibold sm:pt-4">
+                <span className="text-[11px] tracking-tight text-zinc-500 sm:text-[13px]">
+                  {timeOfDay}
+                </span>
+                <span
+                  key={secs}
+                  className="tick text-base text-zinc-300 sm:text-xl"
+                >
+                  {secs}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-1.5 text-sm text-zinc-500">
+              {date.toLocaleDateString(undefined, {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+              <StatChip label="Today" value={todayTotal} />
+              <StatChip
+                label="Current Streak"
+                value={
+                  <span className="inline-flex items-center gap-1">
+                    <AnimatedNumber value={streakDays} />{" "}
+                    {streakDays === 1 ? "day" : "days"}
+                    <span className="flame">🔥</span>
+                  </span>
+                }
+                warm
+              />
+              <StatChip label="This Week" value={weekTotal} />
             </div>
           </div>
 
-          <div className="mt-1 text-sm text-zinc-500">
-            {date.toLocaleDateString(undefined, {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <StatChip label="Today" value={todayTotal} />
-            <StatChip
-              label="Current Streak"
-              value={
-                <span className="inline-flex items-center gap-1">
-                  {streakDays} {streakDays === 1 ? "day" : "days"}
-                  <span className="flame">🔥</span>
-                </span>
+          <style jsx>{`
+            .glow-blob {
+              position: absolute;
+              top: -120px;
+              right: -80px;
+              width: 320px;
+              height: 320px;
+              border-radius: 9999px;
+              filter: blur(50px);
+              animation: drift 22s ease-in-out infinite;
+              pointer-events: none;
+            }
+            @keyframes drift {
+              0%,
+              100% {
+                transform: translate(0, 0) scale(1);
               }
-              warm
-            />
-            <StatChip label="This Week" value={weekTotal} />
-          </div>
+              50% {
+                transform: translate(-24px, 18px) scale(1.08);
+              }
+            }
+            .colon-blink {
+              animation: blink 2s steps(1) infinite;
+            }
+            @keyframes blink {
+              50% {
+                opacity: 0.25;
+              }
+            }
+            .tick {
+              display: inline-block;
+              animation: tick 300ms ease-out;
+            }
+            @keyframes tick {
+              0% {
+                opacity: 0.4;
+                transform: translateY(2px) scale(0.94);
+              }
+              100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            .flame {
+              display: inline-block;
+              animation: flicker 2.4s ease-in-out infinite;
+            }
+            @keyframes flicker {
+              0%,
+              100% {
+                transform: scale(1) rotate(0deg);
+              }
+              50% {
+                transform: scale(1.12) rotate(-4deg);
+              }
+            }
+            .pulse-dot {
+              animation: pulse 1.6s ease-in-out infinite;
+            }
+            @keyframes pulse {
+              0%,
+              100% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
+              }
+              50% {
+                box-shadow: 0 0 0 4px rgba(52, 211, 153, 0);
+              }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .glow-blob,
+              .colon-blink,
+              .tick,
+              .flame,
+              .pulse-dot {
+                animation: none !important;
+              }
+            }
+          `}</style>
         </div>
 
-        <style jsx>{`
-          .glow-blob {
-            position: absolute;
-            top: -120px;
-            right: -80px;
-            width: 320px;
-            height: 320px;
-            border-radius: 9999px;
-            filter: blur(50px);
-            animation: drift 22s ease-in-out infinite;
-            pointer-events: none;
-          }
-          @keyframes drift {
-            0%,
-            100% {
-              transform: translate(0, 0) scale(1);
-            }
-            50% {
-              transform: translate(-24px, 18px) scale(1.08);
-            }
-          }
-          .colon-blink {
-            animation: blink 2s steps(1) infinite;
-          }
-          @keyframes blink {
-            50% {
-              opacity: 0.25;
-            }
-          }
-          .tick {
-            display: inline-block;
-            animation: tick 300ms ease-out;
-          }
-          @keyframes tick {
-            0% {
-              opacity: 0.4;
-              transform: translateY(2px) scale(0.94);
-            }
-            100% {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-          .flame {
-            display: inline-block;
-            animation: flicker 2.4s ease-in-out infinite;
-          }
-          @keyframes flicker {
-            0%,
-            100% {
-              transform: scale(1) rotate(0deg);
-            }
-            50% {
-              transform: scale(1.12) rotate(-4deg);
-            }
-          }
-          .pulse-dot {
-            animation: pulse 1.6s ease-in-out infinite;
-          }
-          @keyframes pulse {
-            0%,
-            100% {
-              box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
-            }
-            50% {
-              box-shadow: 0 0 0 4px rgba(52, 211, 153, 0);
-            }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .glow-blob,
-            .colon-blink,
-            .tick,
-            .flame,
-            .pulse-dot {
-              animation: none !important;
-            }
-          }
-        `}</style>
-      </div>
+        {/* Note to self lives here — a quick, always-on "today" tool */}
+        <div className="mt-3">
+          <NoteCard
+            value={liveMessage}
+            onChange={(val) => {
+              setLiveMessage(val);
+              localStorage.setItem("adminModredMessage", val);
+            }}
+            mounted={mounted}
+            delay={120}
+          />
+        </div>
+      </section>
 
-      {/* History — chart + heatmap, side by side on desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-        <WeekChart
-          weekly={weekly}
-          todayKey={todayKey}
-          loaded={statsLoaded}
-          mounted={mounted}
-          delay={120}
+      {/* ===== INSIGHTS ===== */}
+      <section id="insights" className="scroll-mt-6">
+        <SectionHeader
+          eyebrow="Activity"
+          title="Insights"
+          description="How your coding time has trended this week and over the last few months."
         />
-        <ActivityHeatmap
-          heatmap={heatmap}
-          loaded={statsLoaded}
-          mounted={mounted}
-          delay={240}
-        />
-      </div>
-      {/* Note to self */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
-        <NoteCard
-          value={liveMessage}
-          onChange={(val) => {
-            setLiveMessage(val);
-            localStorage.setItem("adminModredMessage", val);
-          }}
-          mounted={mounted}
-          delay={360}
-        />
-        <JobRadarControls radar={radar} mounted={mounted} delay={420} />
-      </div>
+        <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+          <WeekChart
+            weekly={weekly}
+            todayKey={todayKey}
+            loaded={statsLoaded}
+            mounted={mounted}
+            delay={120}
+          />
+          <ActivityHeatmap
+            heatmap={heatmap}
+            loaded={statsLoaded}
+            mounted={mounted}
+            delay={240}
+          />
+        </div>
+      </section>
 
-      <JobRadarResults radar={radar} mounted={mounted} delay={480} />
+      {/* ===== JOB RADAR ===== */}
+      <section id="radar" className="scroll-mt-6 pb-6">
+        <SectionHeader
+          eyebrow="Opportunities"
+          title="Job Radar"
+          description="Scans remote boards for roles matching your stack, filtered to Nigeria and the USA."
+        />
+        <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-2">
+          <JobRadarControls radar={radar} mounted={mounted} delay={120} />
+          <div
+            className="hidden rounded-2xl p-6 md:flex md:flex-col md:justify-center"
+            style={{
+              background: "#0d0d10",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <p className="text-sm leading-relaxed text-zinc-500">
+              Job Radar checks Remotive and Arbeitnow for fresh full-stack and
+              frontend roles, scores them against your skill chips, and
+              surfaces only postings open to <span className="text-zinc-300">Nigeria</span> or the{" "}
+              <span className="text-zinc-300">USA</span>. Already-seen roles
+              won&apos;t show up twice.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3">
+          <JobRadarResults radar={radar} mounted={mounted} delay={240} />
+        </div>
+      </section>
     </div>
   );
 }
@@ -378,34 +383,12 @@ function StatChip({ label, value, warm = false }) {
   );
 }
 
-function CardShell({ children, mounted, delay = 0 }) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl p-6 transition-[opacity,transform] duration-700 ease-out ${
-        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-      }`}
-      style={{
-        ...CARD_SURFACE,
-        transitionDelay: mounted ? `${delay}ms` : "0ms",
-      }}
-    >
-      <div
-        className="absolute inset-x-6 top-0 h-px"
-        style={{
-          background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.55), transparent)`,
-        }}
-      />
-      {children}
-    </div>
-  );
-}
-
 function WeekChart({ weekly, todayKey, loaded, mounted, delay }) {
   const max = Math.max(60, ...weekly.map((d) => d.seconds));
   const weekSeconds = weekly.reduce((sum, d) => sum + (d.seconds || 0), 0);
 
   return (
-    <CardShell mounted={mounted} delay={delay}>
+    <GlassPanel mounted={mounted} delay={delay}>
       <div className="flex items-baseline justify-between">
         <h3 className="text-sm text-zinc-400">This week</h3>
         <div className="font-mono text-2xl font-bold text-white tabular-nums">
@@ -469,7 +452,7 @@ function WeekChart({ weekly, todayKey, loaded, mounted, delay }) {
           transition: height 600ms cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
-    </CardShell>
+    </GlassPanel>
   );
 }
 
@@ -483,6 +466,7 @@ function bucketFor(seconds) {
   }
   return idx;
 }
+
 function NoteCard({ value, onChange, mounted, delay }) {
   const [saved, setSaved] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -508,7 +492,7 @@ function NoteCard({ value, onChange, mounted, delay }) {
   }
 
   return (
-    <CardShell mounted={mounted} delay={delay}>
+    <GlassPanel mounted={mounted} delay={delay} accent={false} solid>
       <div className="flex items-baseline justify-between">
         <h3 className="text-sm text-zinc-400">Note to self</h3>
         <span
@@ -539,9 +523,10 @@ function NoteCard({ value, onChange, mounted, delay }) {
           onBlur={() => setFocused(false)}
         />
       </div>
-    </CardShell>
+    </GlassPanel>
   );
 }
+
 function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
   const days = heatmap || [];
   const weeks = [];
@@ -553,7 +538,7 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
   let cellIndex = 0;
 
   return (
-    <CardShell mounted={mounted} delay={delay}>
+    <GlassPanel mounted={mounted} delay={delay}>
       <div className="flex items-baseline justify-between ">
         <div>
           <h3 className="text-sm text-zinc-400">Activity</h3>
@@ -563,7 +548,7 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
         </div>
         <div className="text-right">
           <div className="font-mono text-2xl font-bold text-white tabular-nums">
-            {activeDays}
+            <AnimatedNumber value={activeDays} />
           </div>
           <div className="text-[11px] text-zinc-600">active days</div>
         </div>
@@ -628,6 +613,6 @@ function ActivityHeatmap({ heatmap, loaded, mounted, delay }) {
           }
         }
       `}</style>
-    </CardShell>
+    </GlassPanel>
   );
 }
