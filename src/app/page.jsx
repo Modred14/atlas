@@ -203,6 +203,7 @@ export default function Home() {
             </div>
 
             <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+              <StatChip label="Today" value={todayTotal} />
               <StatChip
                 label="Current Streak"
                 value={
