@@ -1,3 +1,4 @@
+// src/app/layout.js
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import AmbientBackground from "./components/AmbientBackground";
@@ -16,7 +17,8 @@ export const viewport = {
 
 export const metadata = {
   title: "Atlas — Personal Workspace",
-  description: "A personal productivity dashboard for coding activity, insights, and job tracking.",
+  description: "A personal workspace for coding activity, job tracking and AI-assisted career outreach.",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }) {

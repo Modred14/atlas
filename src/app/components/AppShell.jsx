@@ -1,38 +1,49 @@
+// src/app/components/AppShell.jsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
+import { ToastProvider } from "./ui";
 
 const COLLAPSE_KEY = "atlasSidebarCollapsed";
 
 export default function AppShell({ children }) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(COLLAPSE_KEY);
-    if (stored) setCollapsed(stored === "1");
+    try {
+      const stored = localStorage.getItem(COLLAPSE_KEY);
+      if (stored) setCollapsed(stored === "1");
+    } catch {}
   }, []);
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
       const next = !prev;
-      localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      try {
+        localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      } catch {}
       return next;
     });
   }
 
+  // The sign-in page has no navigation.
+  if (pathname === "/login") return <ToastProvider>{children}</ToastProvider>;
+
   return (
-    <>
+    <ToastProvider>
       <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
       <MobileNav />
       <main
-        className={`min-h-full flex-1 pb-24 transition-[padding] duration-300 ease-out lg:pb-0 ${
+        className={`min-h-full flex-1 transition-[padding] duration-300 ease-out ${
           collapsed ? "lg:pl-[76px]" : "lg:pl-[240px]"
         }`}
       >
         {children}
       </main>
-    </>
+    </ToastProvider>
   );
 }
