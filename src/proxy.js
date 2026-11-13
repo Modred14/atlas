@@ -15,7 +15,7 @@ export async function proxy(request) {
 
   const isApi = pathname.startsWith("/api/");
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const signedIn = await verifySessionToken(token, process.env.SESSION_SECRET);
+  const signedIn = await verifySessionToken(token, (process.env.SESSION_SECRET || "").trim());
 
   if (!signedIn) {
     if (isApi) return NextResponse.json({ error: "Not signed in" }, { status: 401 });

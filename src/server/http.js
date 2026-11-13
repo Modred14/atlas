@@ -15,7 +15,7 @@ export const json = (data, init) => NextResponse.json(data, init);
 
 export async function requireSession(request) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  if (!(await verifySessionToken(token, process.env.SESSION_SECRET))) {
+  if (!(await verifySessionToken(token, (process.env.SESSION_SECRET || "").trim()))) {
     throw new HttpError(401, "Not signed in");
   }
 }

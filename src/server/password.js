@@ -9,9 +9,18 @@ export function hashPassword(password) {
   return `scrypt:${N}:${r}:${p}:${salt.toString("base64url")}:${hash.toString("base64url")}`;
 }
 
+// Hosting dashboards and hand-edited .env files often leave stray quotes, whitespace, or the
+// "ADMIN_PASSWORD_HASH=" prefix on the value. Strip those so a correct password isn't rejected.
+export function normalizeStoredHash(stored) {
+  let v = String(stored ?? "").trim();
+  v = v.replace(/^ADMIN_PASSWORD_HASH\s*=\s*/, "").trim();
+  v = v.replace(/^(["'`])(.*)\1$/s, "$2").trim();
+  return v;
+}
+
 export function verifyPassword(password, stored) {
   try {
-    const [alg, N, r, p, salt, hash] = String(stored).split(":");
+    const [alg, N, r, p, salt, hash] = normalizeStoredHash(stored).split(":");
     if (alg !== "scrypt") return false;
     const expected = Buffer.from(hash, "base64url");
     const got = crypto.scryptSync(password, Buffer.from(salt, "base64url"), expected.length, {
