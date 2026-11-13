@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "./session.js";
 import { logEvent } from "./log.js";
+import { explainServerError } from "./errors.js";
 
 export class HttpError extends Error {
   constructor(status, message, extra) {
@@ -42,9 +43,10 @@ export function api(handler, { auth = true } = {}) {
         return NextResponse.json({ error: err.message, ...(err.extra || {}) }, { status: err.status });
       }
       const path = request.nextUrl?.pathname;
-      await logEvent("error", "api_error", { path, method: request.method, message: err?.message });
+      console.error(`[api_error] ${request.method} ${path}`, err);
+      await logEvent("error", "api_error", { path, method: request.method, message: err?.message, code: err?.code });
       return NextResponse.json(
-        { error: err?.exposeMessage ? err.message : "Something went wrong on the server. Check the logs." },
+        { error: err?.exposeMessage ? err.message : explainServerError(err) || "Something went wrong on the server. Check the logs." },
         { status: 500 },
       );
     }

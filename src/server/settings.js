@@ -6,7 +6,7 @@ import { merge } from "./util.js";
 export const DEFAULTS = {
   ai: {
     provider: "gemini",
-    model: "gemini-2.5-flash",
+    model: "gemini-3.5-flash",
     baseUrl: "",
     personalization: "",
     defaultTone: "professional",

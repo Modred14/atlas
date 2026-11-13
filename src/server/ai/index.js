@@ -12,7 +12,7 @@ export class AiError extends Error {
 // One interface, three wire formats. Anything OpenAI-compatible (Groq, OpenRouter, OpenAI, local
 // gateways) goes through the "openai" kind; pick "custom" and set a base URL for others.
 export const PROVIDERS = {
-  gemini: { label: "Google Gemini", kind: "gemini", envKey: "GEMINI_API_KEY", defaultModel: "gemini-2.5-flash" },
+  gemini: { label: "Google Gemini", kind: "gemini", envKey: "GEMINI_API_KEY", defaultModel: "gemini-3.5-flash" },
   groq: {
     label: "Groq", kind: "openai", baseUrl: "https://api.groq.com/openai/v1",
     envKey: "GROQ_API_KEY", defaultModel: "llama-3.3-70b-versatile",
@@ -43,7 +43,7 @@ export async function getAiConfig() {
   if (!apiKey) {
     throw new AiError(`No API key for ${preset.label}. Add one in Settings → AI (or set ${preset.envKey}).`, 400);
   }
-  const model = (s.model || preset.defaultModel || "").trim();
+  const model = (s.provider === "gemini" ? effectiveGeminiModel(s.model) : s.model || preset.defaultModel || "").trim();
   if (!model) throw new AiError(`Choose a model for ${preset.label} in Settings → AI.`, 400);
   const baseUrl = (s.provider === "custom" ? s.baseUrl : preset.baseUrl || "").replace(/\/$/, "");
   if (preset.kind === "openai" && !baseUrl) throw new AiError("Set a base URL for the custom provider in Settings → AI.", 400);
@@ -90,22 +90,70 @@ async function post(label, url, headers, body, { retries = 2 } = {}) {
   }
 }
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
+
+// Google retires Gemini models on a fixed schedule (2.0 in June 2026, 2.5 on 16 Oct 2026). A saved
+// setting or old default naming one of them would 404 forever, so such names are swapped for the default.
+const GEMINI_RETIRED = /^gemini-(1\.\d+|2\.0|2\.5)(-|$)/;
+
+export function effectiveGeminiModel(requested) {
+  const m = String(requested || "").trim();
+  return !m || GEMINI_RETIRED.test(m) ? PROVIDERS.gemini.defaultModel : m;
+}
+
+const versionOf = (name) => (/^gemini-(\d+)(?:\.(\d+))?-flash$/.exec(name) || []).slice(1).map((n) => Number(n || 0));
+const newer = (a, b) => versionOf(b)[0] - versionOf(a)[0] || versionOf(b)[1] - versionOf(a)[1];
+
+// Newest plain "flash" model this key can call, discovered from the API itself so a future retirement
+// does not break the app again.
+async function listGeminiFlashModels(apiKey) {
+  try {
+    const res = await fetch(`${GEMINI_BASE}/models?pageSize=200`, {
+      headers: { "x-goog-api-key": apiKey },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json().catch(() => null);
+    return (data?.models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m) => String(m.name || "").replace(/^models\//, ""))
+      .filter((n) => /^gemini-\d+(\.\d+)?-flash$/.test(n))
+      .sort(newer);
+  } catch {
+    return [];
+  }
+}
+
+let geminiSubstitute = null; // { from, to }: remembered for the life of the server process
+
+async function geminiGenerate(apiKey, requested, body) {
+  const model = geminiSubstitute?.from === requested ? geminiSubstitute.to : effectiveGeminiModel(requested);
+  const call = (m) => post("Gemini", `${GEMINI_BASE}/models/${encodeURIComponent(m)}:generateContent`, { "x-goog-api-key": apiKey }, body);
+  try {
+    return await call(model);
+  } catch (err) {
+    if (err.providerStatus !== 404) throw err;
+    const [next] = (await listGeminiFlashModels(apiKey)).filter((n) => n !== model);
+    if (!next) throw err;
+    const data = await call(next);
+    geminiSubstitute = { from: requested, to: next };
+    console.warn(`[ai] Gemini model "${model}" is unavailable; using "${next}". Update Settings → AI.`);
+    return data;
+  }
+}
+
 async function callGemini(cfg, { system, user, json, temperature, maxTokens }) {
-  const data = await post(
-    "Gemini",
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model)}:generateContent`,
-    { "x-goog-api-key": cfg.apiKey },
-    {
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: {
-        temperature,
-        maxOutputTokens: maxTokens,
-        ...(json ? { responseMimeType: "application/json" } : {}),
-      },
+  const data = await geminiGenerate(cfg.apiKey, cfg.model, {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: user }] }],
+    generationConfig: {
+      temperature,
+      // Gemini's internal "thinking" tokens count against this limit; a tight cap leaves no room for the answer.
+      maxOutputTokens: Math.max(maxTokens * 4, 8192),
+      ...(json ? { responseMimeType: "application/json" } : {}),
     },
-  );
-  const text = (data?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+  });
+  const text = (data?.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
   if (!text) {
     const why = data?.promptFeedback?.blockReason || data?.candidates?.[0]?.finishReason || "empty response";
     throw new AiError(`Gemini returned no text (${why}).`);
@@ -188,17 +236,12 @@ export async function groundedSearch(prompt) {
   if (!key) return null;
   const s = await getSetting("ai");
   const model = s.provider === "gemini" && s.model ? s.model : PROVIDERS.gemini.defaultModel;
-  const data = await post(
-    "Gemini",
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    { "x-goog-api-key": key },
-    {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 4096 },
-    },
-  );
-  const text = (data?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+  const data = await geminiGenerate(key, model, {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    tools: [{ google_search: {} }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
+  });
+  const text = (data?.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
   const chunks = data?.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
   return { text, sources: chunks.map((c) => c.web).filter(Boolean) };
 }
