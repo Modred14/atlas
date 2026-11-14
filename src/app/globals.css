@@ -8,6 +8,30 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+/* Dark dropdown menus: the open list of a <select> is drawn by the browser, so style it explicitly */
+select,
+input,
+textarea {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #141417;
+  color: #f4f4f5;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+select option:disabled {
+  color: #71717a;
 }
 
 ::selection {

@@ -212,7 +212,7 @@ export function Toggle({ checked, onChange, label, description, disabled }) {
         onClick={() => onChange(!checked)}
         className={cx("relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(77,141,255)]", checked ? "bg-[rgb(77,141,255)]" : "bg-white/15")}
       >
-        <span className={cx("absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-150", checked ? "translate-x-[18px]" : "translate-x-0.5")} />
+        <span className={cx("absolute left-0 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-150", checked ? "translate-x-[18px]" : "translate-x-0.5")} />
       </button>
     </label>
   );
